@@ -49,7 +49,7 @@ class PhotoContainer(object):
     def __str__(self):
         return f'PhotoContainer({list(map(str, self.photos))})'
 
-    def generate_solution(self, required_size: int = None, breadth_size: int = 500) -> List[str]:
+    def generate_solution(self, required_size: int = None, breadth_size: int = 2000, **kwargs) -> List[Photo]:
 
         if not required_size or len(self.photos) < required_size:
             required_size = len(self.photos)
@@ -57,6 +57,8 @@ class PhotoContainer(object):
         sorted_photos = list()
 
         print(len(self.photos))
+
+        shuffle(self.photos)
 
         target = self.photos.pop()
         sorted_photos.append(target)
@@ -67,7 +69,7 @@ class PhotoContainer(object):
             if len(sorted_photos) % breadth_size == 0:
                 shuffle(self.photos)
 
-            fn = lambda p: (PhotoContainer.similarity(sorted_photos[-1], p), p)
+            fn = lambda p: (Photo.similarity(sorted_photos[-1], p), p)
 
             mapping = map(fn, self.photos[:breadth_size])
             maximum = max(mapping, key=itemgetter(0))
@@ -82,12 +84,40 @@ class PhotoContainer(object):
 
         print(f'FINAL: {len(sorted_photos):5}, {points:2}')
 
-        return list(map(lambda p: p.identifier, sorted_photos))
+        return sorted_photos
 
-    @staticmethod
-    def similarity(p1: Photo, p2: Photo):
-        return min(
-            len(p1.tags.intersection(p2.tags)),
-            len(p1.tags.difference(p2.tags)),
-            len(p2.tags.difference(p1.tags))
-        )
+    def optimize_solution(self, sorted_photos: List[Photo], max_optimization_itr: int = 20000, **kwargs) -> List[Photo]:
+
+        saving = 0
+        saving_itr = None
+        k = 0
+        while saving_itr is None or saving_itr > 0 and k < max_optimization_itr:
+            saving_itr = 0
+            for i in range(0, len(sorted_photos) - 2):
+
+                p1 = sorted_photos[i]
+                p2 = sorted_photos[i + 1]
+                p3 = sorted_photos[i + 2]
+
+                old = Photo.similarity(p1, p2) + Photo.similarity(p2, p3)
+                new = Photo.similarity(p2, p1) + Photo.similarity(p1, p3)
+
+                if new <= old:
+                    continue
+
+                saving_itr += new - old
+
+                sorted_photos[i] = p2
+                sorted_photos[i + 1] = p1
+            if k % 100 == 0:
+                print(f'{saving:5}')
+            k += 1
+            saving += saving_itr
+        print(f'FINAL: {saving:5}')
+
+        return sorted_photos
+
+    def solve(self, **kwargs) -> List[str]:
+        sorted_photos = self.generate_solution(**kwargs)
+        sorted_photos = self.optimize_solution(sorted_photos, **kwargs)
+        return list(map(lambda p: p.identifier, sorted_photos))

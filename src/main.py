@@ -36,7 +36,7 @@ def main():
     input_data = read(input_file)
 
     photo_set = PhotoContainer.from_raw(input_data)
-    solution = photo_set.generate_solution()
+    solution = photo_set.solve()
 
     str_solution = solution_to_str(solution)
 

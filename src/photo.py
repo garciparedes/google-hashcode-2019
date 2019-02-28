@@ -14,3 +14,11 @@ class Photo(object):
 
     def __str__(self):
         return f'Photo({self.identifier}, {self.is_horizontal}, {self.tags})'
+
+    @staticmethod
+    def similarity(p1: 'Photo', p2: 'Photo') -> int:
+        return min(
+            len(p1.tags.intersection(p2.tags)),
+            len(p1.tags.difference(p2.tags)),
+            len(p2.tags.difference(p1.tags))
+        )
