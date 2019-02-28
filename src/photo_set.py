@@ -1,16 +1,16 @@
-from typing import List
+from typing import List, Set
 
 from src.photo import Photo
 
 
 class PhotoSet(object):
 
-    def __init__(self, photos: List[Photo]):
-        self.photos = list(photos)
+    def __init__(self, photos: Set[Photo]):
+        self.photos = set(photos)
 
     @staticmethod
     def from_raw(raw_data: List[str]) -> 'PhotoSet':
-        photos = list()
+        photos = set()
 
         i = 0
         while i < len(raw_data):
@@ -26,7 +26,12 @@ class PhotoSet(object):
                 i += 1
                 if not i < len(raw_data):
                     continue
+
                 row_2 = raw_data[i].split(' ')
+
+                if not row_2[0] == 'V':
+                    continue
+
                 photo = Photo(
                     identifier=f'{i - 1} {i}',
                     is_horizontal=False,
@@ -35,7 +40,7 @@ class PhotoSet(object):
             else:
                 raise Exception(f'Bad Data input: {row}')
             i += 1
-            photos.append(photo)
+            photos.add(photo)
 
         return PhotoSet(photos)
 
@@ -43,9 +48,8 @@ class PhotoSet(object):
         return f'PhotoSet({list(map(str, self.photos))})'
 
     def generate_solution(self) -> List[str]:
-        solution = list()
+        sorted_photos = list()
 
-        for photo in self.photos:
-            solution.append(photo.identifier)
+        sorted_photos = list(self.photos)
 
-        return solution
+        return list(map(lambda p: p.identifier, sorted_photos))
