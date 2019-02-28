@@ -47,9 +47,31 @@ class PhotoSet(object):
     def __str__(self):
         return f'PhotoSet({list(map(str, self.photos))})'
 
-    def generate_solution(self) -> List[str]:
+    def generate_solution(self, required_size: int = 10000) -> List[str]:
+
+        if len(self.photos) < required_size:
+            required_size = len(self.photos)
+
         sorted_photos = list()
 
-        sorted_photos = list(self.photos)
+        # sorted_photos = list(self.photos)
+
+        target = self.photos.pop()
+        sorted_photos.append(target)
+
+        while len(sorted_photos) < required_size:
+            for photo in self.photos:
+                if len(sorted_photos[-1].tags.intersection(photo.tags)) > 0:
+                    sorted_photos.append(photo)
+                    self.photos.remove(photo)
+                    break
 
         return list(map(lambda p: p.identifier, sorted_photos))
+
+    @staticmethod
+    def similarity_photos(p1: Photo, p2: Photo):
+        return min(
+            len(p1.tags.intersection(p2.tags)),
+            len(p1.tags.difference(p2.tags)),
+            len(p2.tags.difference(p1.tags))
+        )
