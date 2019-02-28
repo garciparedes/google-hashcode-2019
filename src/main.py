@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from typing import List
 
-from src.photo_set import PhotoSet
+from src.photo_set import PhotoContainer
 
 
 def read(path: Path) -> List[str]:
@@ -35,7 +35,7 @@ def main():
 
     input_data = read(input_file)
 
-    photo_set = PhotoSet.from_raw(input_data)
+    photo_set = PhotoContainer.from_raw(input_data)
     solution = photo_set.generate_solution()
 
     str_solution = solution_to_str(solution)
