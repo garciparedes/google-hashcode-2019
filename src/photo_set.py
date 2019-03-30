@@ -49,7 +49,7 @@ class PhotoContainer(object):
     def __str__(self):
         return f'PhotoContainer({list(map(str, self.photos))})'
 
-    def generate_solution(self, required_size: int = None, breadth_size: int = 2000, **kwargs) -> List[Photo]:
+    def generate_solution(self, required_size: int = None, breadth_size: int = 500, **kwargs) -> List[Photo]:
 
         if not required_size or len(self.photos) < required_size:
             required_size = len(self.photos)
@@ -63,11 +63,13 @@ class PhotoContainer(object):
         target = self.photos.pop()
         sorted_photos.append(target)
 
+        self.photos.sort(key=lambda p: len(target.tags.intersection(p.tags)), reverse=True)
+
         points = 0
         while len(sorted_photos) < required_size:
 
-            if len(sorted_photos) % breadth_size == 0:
-                shuffle(self.photos)
+            if len(sorted_photos) % 1000 == 0:
+                self.photos.sort(key=lambda p: Photo.similarity(sorted_photos[-1], p), reverse=True)
 
             fn = lambda p: (Photo.similarity(sorted_photos[-1], p), p)
 
